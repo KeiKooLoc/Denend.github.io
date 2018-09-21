@@ -31,7 +31,14 @@ $.ajax({
 
 
   Chart.defaults.global.defaultFontFamily = '"Comic Sans MS", cursive, sans-serif';
+ /* if(document.documentElement.clientWidth < 767 && document.documentElement.clientWidth >419) {
+Chart.defaults.global.defaultFontSize = 7;
+} else if (document.documentElement.clientWidth < 420)
+{
+  Chart.defaults.global.defaultFontSize = 5;
+} else if (document.documentElement.clientWidth> 766){
   Chart.defaults.global.defaultFontSize = 14;
+};  */
   var barChart = new Chart(mySuperChart, {
     type: "pie",
     data: {
