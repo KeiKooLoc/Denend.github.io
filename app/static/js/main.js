@@ -1,7 +1,7 @@
 document.addEventListener("DOMContentLoaded", function(event) {
-$("body").on("click","span",obj_opros.click_positive);
-$("body").on("click","i",obj_opros.click_negative);
-$("body").on("click","#button_submit_opros",obj_opros.click_button_opros);
+$("body").on("click touchend","span",obj_opros.click_positive);
+$("body").on("click touchend","i",obj_opros.click_negative);
+$("body").on("click touchend","#button_submit_opros",obj_opros.click_button_opros);
 $("#mail").mouseout(function (){validation.msoutMail()});
 $("#pass").mouseout(function(){validation.msoutPass()});
 $("#pass1").mouseout(function(){validation.msoutPass1()});
@@ -92,25 +92,16 @@ $.ajax({
     }
 
   });
-
+$(window).resize(function() {
+  if(document.documentElement.clientWidth < 767 && document.documentElement.clientWidth >419) {
+  Chart.defaults.global.defaultFontSize = 7;
+} else if (document.documentElement.clientWidth < 420)
+{
+    Chart.defaults.global.defaultFontSize = 5;
+};
 });
 };
 //};
-/*$(function () {
-    cur_url = location.href.substring(location.href.lastIndexOf('/'));
-  if(cur_url == "/login?next=%2Fopros" || cur_url == "/login?next=%2Fstatistics")
-   {
-   cur_url == cur_url.split('?')[0]; //  "/login"
-   link == "/login"
- };
-  $('.menu li').each(function () {
-        link = $(this).find('a').attr('href');
-        if (cur_url == link)
-          {
-              $(this).addClass('active');
-          };
-    });
-    */
    $(function () {
       cur_url = location.href.substring(location.href.lastIndexOf('/'));
       if(cur_url == "/login?next=%2Fopros" || cur_url == "/login?next=%2Fstatistics")
