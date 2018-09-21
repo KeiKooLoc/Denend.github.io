@@ -100,7 +100,7 @@ $(window).resize(function() {
     Chart.defaults.global.defaultFontSize = 5;
 };
 });
-};
+});
 //};
    $(function () {
       cur_url = location.href.substring(location.href.lastIndexOf('/'));
