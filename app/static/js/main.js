@@ -101,7 +101,7 @@ $(window).resize(function() {
 };
 });
 });
-//};
+};
    $(function () {
       cur_url = location.href.substring(location.href.lastIndexOf('/'));
       if(cur_url == "/login?next=%2Fopros" || cur_url == "/login?next=%2Fstatistics")
