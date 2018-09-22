@@ -33,7 +33,7 @@ document.addEventListener("keydown", moveUp);
 document.addEventListener("touchend", moveUp);
 button_run = document.getElementById("poigrat")
 button_run.onclick = run_game;
-$.mobile.zoom.disable();
+
 });
 function moveUp(){
   if(check_click == 0){
