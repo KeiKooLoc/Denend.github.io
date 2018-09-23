@@ -181,8 +181,6 @@ var obj_send2 = {
   count
 }
 var string_result = JSON.stringify(obj_send2);
-alert(string_result);
-
 $.ajax({
    data : string_result,
    contentType: "application/json; charset=utf-8",
