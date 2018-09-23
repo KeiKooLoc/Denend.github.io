@@ -7,6 +7,7 @@ var kosoj_up = new Image();
 var kosoj_bot = new Image();
 var shishlo = new Image();
 var ura_high = new Image();
+var bg_vmazannue = new Image(); 
 ura.src = "/static/js/flappy_yuras/images/ura.png";
 bg.src = "/static/js/flappy_yuras/images/bg.png";
 fg.src = "/static/js/flappy_yuras/images/fg.png";
@@ -14,6 +15,7 @@ kosoj_up.src = "/static/js/flappy_yuras/images/kosojUP.png";
 kosoj_bot.src = "/static/js/flappy_yuras/images/kosojBOT.png";
 shishlo.src = "/static/js/flappy_yuras/images/shish.png";
 ura_high.src = "/static/js/flappy_yuras/images/ura2.png";
+bg_vmazannue.src = "/static/js/flappy_yuras/images/bg_pash.png";
 var fly = new Audio();
 var score_aud = new Audio();
 //var score1_aud = new Audio();
@@ -163,7 +165,7 @@ if(xPoz + ura.width >= shyshki[i].x && xPoz <= shyshki[i].x + shishlo.width && y
  run_interval();
 }
 if (yPoz <= 0 && counter_t == 25  && count < 50){
-  count = 1488;
+  bg = bg_vmazannue;
 
 };
 if(xPoz + ura.width - 5>= kosyaki[i].x + 5 && xPoz <= kosyaki[i].x + kosoj_up.width - 5 && (yPoz<= kosyaki[i].y +kosoj_up.height||yPoz + ura.height - 5>=kosyaki[i].y + kosoj_up.height + gap) || yPoz<=-5 || yPoz + ura.height >= canvas.height - fg.height + 10){
