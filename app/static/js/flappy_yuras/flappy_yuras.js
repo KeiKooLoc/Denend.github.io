@@ -33,6 +33,10 @@ var check_click = 0;
 document.addEventListener('DOMContentLoaded', function(){
 document.addEventListener("keydown", moveUp);
 document.addEventListener("touchend", moveUp);
+ $('.no-zoom').bind('touchend', function(e) {
+ e.preventDefault();
+ $(this).click();
+});
 button_run = document.getElementById("poigrat")
 button_run.onclick = run_game;
 
