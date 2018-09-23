@@ -189,10 +189,6 @@ $.ajax({
       url : '/f_y_process'
  })
  .done(function(data) {
-   //alert(data["1"]);
-   //alert(JSON.stringify(data));
-alert("Selman is a fucking bitch")
-alert(JSON.stringify(data))
  });
 
 counter_t = 0;
