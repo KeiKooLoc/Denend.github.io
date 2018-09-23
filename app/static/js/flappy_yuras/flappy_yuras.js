@@ -33,7 +33,7 @@ var check_click = 0;
 document.addEventListener('DOMContentLoaded', function(){
 document.addEventListener("keydown", moveUp);
 document.addEventListener("touchend", moveUp);
- $('#canvas').bind('touchend', function(e) {
+ $('#canvas').bind('click touchend', function(e) {
  e.preventDefault();
  $(this).click();
 });
