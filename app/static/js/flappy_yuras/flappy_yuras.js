@@ -165,7 +165,6 @@ if(AnimSpeed == 1 && kosyaki[i].x==80){
 
 if(xPoz + ura.width >= shyshki[i].x && xPoz <= shyshki[i].x + shishlo.width && yPoz + ura.height/2 <=shyshki[i].y + shishlo.height && yPoz + ura.height/2 >= shyshki[i].y) {
   count += 1;
-  //result.innerHTML = "Result = " + count;
  run_interval();
 }
 if (yPoz <= 0 && counter_t == 25  && count < 50){
