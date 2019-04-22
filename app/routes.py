@@ -1,28 +1,66 @@
 # -*- coding: utf-8 -*-
-from flask import render_template, url_for, redirect, flash, session, request, jsonify, send_from_directory, send_file, Response
-from app import app, db
+from flask import render_template, url_for, redirect, flash, session, request, jsonify
+from app import app, db, captcha
 from flask_login import current_user, login_user, logout_user, login_required
-from app.models import User, Answer, Question
+from app.models import User, Answer, Question, Post
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.urls import url_parse
-import json
-from operator import itemgetter
-from collections import OrderedDict
-@app.route('/')
-@app.route('/home')
+from json import dumps
+from datetime import datetime
+
+
+@app.route('/', methods=['GET', 'POST'])
+@app.route('/home', methods=['GET', 'POST'])
 def home():
     num_of_users = str(len(User.query.all()))
-    name = User.query.filter_by(id=1).first()
-    return render_template('home.html', title=u'Дом, сука', num_of_users=num_of_users, name=name)
+    if request.method == 'POST':
+        body = request.form['body']
+        if len(body) > 500 or len(body) < 1:
+            flash('the message must be between 1 and 500 symbols', 'info')
+            return redirect(url_for('home'))
+        else:
+            post = Post(body=body, author=current_user)
+            db.session.add(post)
+            db.session.commit()
+            return redirect(url_for('home'))
+    page = request.args.get('page', 1, type=int)
+    posts = Post.query.order_by(Post.timestamp.desc()).paginate(
+        page, app.config['POSTS_PER_PAGE'], False)
+    next_url = url_for('home', page=posts.next_num) \
+        if posts.has_next else None
+    prev_url = url_for('home', page=posts.prev_num) \
+        if posts.has_prev else None
+    return render_template('home.html', title=u'Дом, сука', num_of_users=num_of_users, posts=posts.items,
+                            next_url=next_url, prev_url=prev_url)
+
+
+@app.route('/delete/<string:id>', methods =['POST'])
+def delete(id):
+    post = Post.query.get(id)
+    db.session.delete(post)
+    db.session.commit()
+    flash('Your post was successfully deleted', 'success')
+    return redirect(url_for('home'))
+
+
+@app.route('/edit_post/<string:id>', methods = ['GET', 'POST'])
+def edit_post(id):
+    post = Post.query.get(id)
+    if post.user_id != current_user.id:
+        return redirect(url_for('home'))
+    if request.method == 'POST' and current_user.id == post.user_id:
+        new_body = request.form['body']
+        post.body = new_body
+        db.session.commit()
+        flash('Your post successfully changed', 'success')
+        return redirect(url_for('home'))
+    return render_template('edit_post.html', post=post.body)
 
 
 @app.route('/_opros_process', methods=['GET', 'POST'])
 def opros_process():
-    #THe return type must be a str, tuple response instance, or WSGI callable
-    #answers = request.get_json()  json.loads(request.data)
     if request.method == 'POST':
         ans = request.get_json()
-        print ans
         for key in ans:
            q = Question.query.get(int(key))
            answer = Answer(qstion=q, author=current_user, ans=ans[key]['result'])
@@ -31,7 +69,6 @@ def opros_process():
         result = {}
         for i in range(1, 10):
             result[i] = Answer.query.filter_by(ans=True, question_id=i).count()
-        print result
         return jsonify(result)
 
 
@@ -50,7 +87,6 @@ def statistics_process():
     result = {}
     for i in range(1, 10):
         result[i] = Answer.query.filter_by(ans=True, question_id=i).count()
-    print result
     return jsonify(result)
 
 
@@ -72,60 +108,31 @@ def about_us():
 @app.route('/f_y_process', methods=['GET', 'POST'])
 def f_y_process():
     result = request.get_json()
-
-    #print result['count']
-
     u = User.query.filter_by(id=current_user.id).first()
-    #print u.f_y_record
-    #print current_user.f_y_record
-    #if u.f_y_record == None:
-        #u.f_y_record = 0
-        #db.session.commit()
-    #print u.f_y_record
-    print current_user.f_y_record
-    #u_record = u.f_y_record
     if int(result['count']) > u.f_y_record:
         u.f_y_record = int(result['count'])
         db.session.commit()
-    print u.f_y_record
     top3 = User.query.filter(User.f_y_record>=0).order_by(User.f_y_record.desc())[:3]
-    print top3
     top3dic = {}
-    for i in top3:
-        top3dic[i.username] = i.f_y_record
-    print top3dic
+    for div_id, i in enumerate(reversed(top3)):
+        top3dic[i.f_y_record] = [i.username, div_id]
+    print(top3dic)
+    return dumps(top3dic, indent=2, sort_keys=True)
 
-
-    #sorted_top3 = sorted(top3dic.items(), key= itemgetter(0))
-    #print sorted_top3
-    #send_top3 = jsonify(sorted_top3)
-    #top3orderdic = OrderedDict(sorted(top3dic.items()))
-    #print top3orderdic
-    return jsonify(top3dic)
 
 # Flappy Yuras view
 @app.route('/flappy_yuras')
 @login_required
 def flappy_yuras():
-    top1 = User.query.filter(User.f_y_record>=0).order_by(User.f_y_record.desc())[:1]
-    top2 = User.query.filter(User.f_y_record>=0).order_by(User.f_y_record.desc())[1:2]
-    top3 = User.query.filter(User.f_y_record>=0).order_by(User.f_y_record.desc())[2:3]
-    top1send = []
-    top2send = []
-    top3send = []
-    for i in top1:
-        top1send.append(i.username)
-        top1send.append(i.f_y_record)
-    for i in top2:
-        top2send.append(i.username)
-        top2send.append(i.f_y_record)
-    for i in top3:
-        top3send.append(i.username)
-        top3send.append(i.f_y_record)
-    print top1send
-    return render_template('flappy_yuras.html', top1name=top1send[0], top1score=top1send[1],
-                                                top2name=top2send[0], top2score=top2send[1],
-                                                top3name=top3send[0], top3score=top3send[1])
+    top3ls = []
+    for i in range(3):
+        top = User.query.filter(User.f_y_record>=0).order_by(User.f_y_record.desc())[i:i+1]
+        for u in top:
+            top3ls.append(u.username)
+            top3ls.append(u.f_y_record)
+    return render_template('flappy_yuras.html', top1name=top3ls[0], top1score=top3ls[1],
+                                                top2name=top3ls[2], top2score=top3ls[3],
+                                                top3name=top3ls[4], top3score=top3ls[5])
 
 
 #User Login
@@ -142,7 +149,6 @@ def login():
             remember_me = True
         else:
             remember_me = False
-
         user = User.query.filter_by(username=username).first()
         if user is None or not user.check_password(password):
             flash(u'Курлык, неправильный логин или пароль', 'danger')
@@ -181,16 +187,14 @@ def register():
             flash(u'Уже кто-то назвал себя так', 'danger')
             return redirect(url_for('register'))
         else:
-            u = User(username=username)
-            u.set_password(password)
-            db.session.add(u)
-            db.session.commit()
-            #questions = ['question1', 'question2', 'question3', 'question4', 'question5', 'question6',
-                        #'question7', 'question8','question9','question10']
-            #for q in questions:
-                #qst = Question(body=q)
-                #db.session.add(qst)
-            #db.session.commit()
-            flash('Congratulations, you are now a registred user!', 'success')
-            return redirect(url_for('login'))
+            if captcha.validate():
+                u = User(username=username)
+                u.set_password(password)
+                db.session.add(u)
+                db.session.commit()
+                flash('Congratulations, you are now a registred user!', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('captcha is not right', 'danger')
+                return redirect(url_for('register'))
     return render_template('register.html', title=u'зарегай себя')
